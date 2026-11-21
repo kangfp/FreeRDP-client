@@ -73,7 +73,7 @@ swift test            # unit tests + real-process integration tests
 
 ## License
 
-[MIT](LICENSE) © kang-kmac
+[MIT](LICENSE) © kangfp
 
 This repository contains only the original GUI frontend code. FreeRDP is a
 separate Apache-2.0 project installed by the user via Homebrew. UI glyphs use
