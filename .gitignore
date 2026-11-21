@@ -1,0 +1,15 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# 构建产物 (build.sh 生成)
+build/
+
+# macOS
+.DS_Store
+
+# Xcode
+DerivedData/
+*.xcresult
+xcuserdata/
