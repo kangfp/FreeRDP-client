@@ -1,7 +1,19 @@
 # FreeRDP 客户端 (macOS)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+中文 | [English](README.en.md)
+
 给命令行版 FreeRDP 套上的原生 macOS 图形界面。SwiftUI 编写，把常用参数全部做成图形选项，
 连接配置可保存、复制、搜索，密码存 macOS 钥匙串，会话带实时日志。
+
+> **非官方项目**：本项目是 [FreeRDP](https://www.freerdp.com) 的第三方图形前端，
+> 独立开发维护，与 FreeRDP 官方项目无隶属关系。仓库不包含 FreeRDP 源码或二进制，
+> FreeRDP 本身采用 Apache-2.0 许可证，由用户自行安装。
+
+<!-- 添加界面截图后取消注释:
+![界面](docs/screenshot.png)
+-->
 
 ## 功能
 
@@ -30,12 +42,27 @@
 - FreeRDP 3：`brew install freerdp` (使用其中的 `sdl-freerdp`，原生 SDL3，无需 XQuartz)
 - 构建需要 Xcode 或 Command Line Tools (Swift 6+)
 
-## 构建与安装
+## 安装 (使用者)
+
+1. 安装 FreeRDP (本应用调用系统中的 `sdl-freerdp`)：
+   ```bash
+   brew install freerdp
+   ```
+2. 从 [Releases](../../releases) 下载 `FreeRDPClient-<版本>.dmg`，双击打开，把图标拖进 Applications。
+
+> **首次打开提示**：DMG 为 ad-hoc 签名 (未做 Apple 付费公证)，从网上下载后
+> Gatekeeper 可能拦截。右键点应用 →「打开」→ 确认一次即可；或执行：
+> ```bash
+> xattr -dr com.apple.quarantine /Applications/FreeRDPClient.app
+> ```
+
+## 从源码构建 (开发者)
 
 ```bash
 ./build.sh            # 构建, 产物 build/FreeRDPClient.app
 ./build.sh install    # 构建并安装到 /Applications
-swift test            # 运行参数构建单元测试
+./build.sh dmg        # 构建并生成拖拽安装 DMG
+swift test            # 单元测试 + 真实进程集成测试
 ```
 
 ## 使用提示
@@ -82,3 +109,11 @@ build.sh                   一键构建 .app
 
 - 会话内证书/凭据交互弹窗由 sdl-freerdp 自己的 SDL 对话框处理；本客户端默认 TOFU + 显式凭据，正常流程无需交互
 - 尚未支持 .rdp 文件导入/导出 (后续可加)
+
+## 许可证
+
+本项目以 [MIT License](LICENSE) 开源。
+
+- 仓库仅包含图形前端的原创代码，不包含、不链接 FreeRDP 源码或二进制
+- [FreeRDP](https://github.com/FreeRDP/FreeRDP) 是独立项目，采用 Apache-2.0 许可证，由用户通过 Homebrew 自行安装
+- 界面图标使用 Apple SF Symbols，遵循其许可条款 (仅限运行于 Apple 平台的应用)

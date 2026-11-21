@@ -3,6 +3,7 @@
 # 用法:
 #   ./build.sh            仅构建, 产物在 build/FreeRDPClient.app
 #   ./build.sh install    构建并安装到 /Applications
+#   ./build.sh dmg        构建并生成拖拽安装 DMG (build/FreeRDPClient-<版本>.dmg)
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -44,4 +45,36 @@ if [ "${1:-}" = "install" ]; then
     rm -rf "/Applications/$APP_NAME.app"
     ditto "$APP" "/Applications/$APP_NAME.app"
     echo "==> 已安装: /Applications/$APP_NAME.app"
+fi
+
+if [ "${1:-}" = "dmg" ]; then
+    echo "==> 制作 DMG…"
+    VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$APP/Contents/Info.plist")
+    DMG="$BUILD_DIR/$APP_NAME-$VERSION.dmg"
+    STAGING="$BUILD_DIR/dmg-staging"
+    VOLNAME="FreeRDP 客户端"
+    rm -rf "$STAGING"; mkdir -p "$STAGING"
+    ditto "$APP" "$STAGING/$APP_NAME.app"
+    ln -s /Applications "$STAGING/Applications"
+    rm -f "$DMG"
+
+    # 先做可写镜像, 挂载后放入卷图标, 再压缩为只读 UDZO
+    RW="$BUILD_DIR/$APP_NAME-rw.dmg"
+    rm -f "$RW"
+    if hdiutil create -volname "$VOLNAME" -srcfolder "$STAGING" -fs HFS+ -format UDRW -ov "$RW" >/dev/null 2>&1 \
+       && ATTACH_OUT=$(hdiutil attach "$RW" -nobrowse -noautoopen 2>/dev/null); then
+        MOUNT=$(echo "$ATTACH_OUT" | grep -o '/Volumes/.*' | tail -1)
+        if [ -n "$MOUNT" ] && [ -d "$MOUNT" ]; then
+            cp "$BUILD_DIR/AppIcon.icns" "$MOUNT/.VolumeIcon.icns" 2>/dev/null || true
+            SetFile -a C "$MOUNT" 2>/dev/null || true
+        fi
+        hdiutil detach "$MOUNT" >/dev/null 2>&1 || true
+        hdiutil convert "$RW" -format UDZO -imagekey zlib-level=9 -o "$DMG" >/dev/null
+        rm -f "$RW"
+    else
+        echo "    (回退: 直接压缩生成)"
+        hdiutil create -volname "$VOLNAME" -srcfolder "$STAGING" -fs HFS+ -format UDZO -imagekey zlib-level=9 -ov "$DMG" >/dev/null
+    fi
+    rm -rf "$STAGING"
+    echo "==> DMG 完成: $DMG"
 fi

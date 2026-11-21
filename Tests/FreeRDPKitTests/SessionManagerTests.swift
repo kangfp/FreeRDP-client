@@ -44,6 +44,9 @@ final class SessionManagerTests: XCTestCase {
     }
 
     func testTerminateAllKillsWatchdogAndFreeRDP() throws {
+        if ProcessInfo.processInfo.environment["CI"] != nil {
+            throw XCTSkip("CI 环境跳过真实进程集成测试 (SDL 对话框依赖桌面会话)")
+        }
         guard FreeRDPBinary.sdl != nil else {
             throw XCTSkip("本机未安装 sdl-freerdp")
         }
@@ -71,6 +74,9 @@ final class SessionManagerTests: XCTestCase {
     }
 
     func testDisconnectTerminatesSession() throws {
+        if ProcessInfo.processInfo.environment["CI"] != nil {
+            throw XCTSkip("CI 环境跳过真实进程集成测试 (SDL 对话框依赖桌面会话)")
+        }
         guard FreeRDPBinary.sdl != nil else {
             throw XCTSkip("本机未安装 sdl-freerdp")
         }
